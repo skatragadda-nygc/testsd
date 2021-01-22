@@ -1,3 +1,4 @@
+import logging
 import os
 import urllib.request
 from datetime import datetime
@@ -8,21 +9,21 @@ import pandas as pd
 
 def download_data(file_path: str) -> None:
     if os.path.exists(file_path):
-        print(f"Found data file {file_path}")
+        logging.info(f"Found data file {file_path}")
     else:
-        print(f"Data file not found. Downloading...")
+        logging.info(f"Data file not found. Downloading...")
         urllib.request.urlretrieve(
             "https://data.wprdc.org/dataset/ad5bd3d6-1b53-4ed0-8cd9-157a985bd0bd/resource/f8ab32f7-44c7-43ca-98bf-c1b444724598/download/2099.csv",
             file_path,
         )
-        print(f"Downloaded data file {file_path}")
+        logging.info(f"Downloaded data file {file_path}")
 
 
 def generate_report(file_path: str, column_name: str) -> None:
-    print(f"Loading source data {file_path}")
+    logging.info(f"Loading source data {file_path}")
     df = pd.read_csv(file_path)
 
-    print("Transforming data")
+    logging.info("Transforming data")
     column_name_year = "Year"
     df[column_name_year] = df.apply(
         lambda row: str(datetime.fromisoformat(row.ValidDate).year),
@@ -38,7 +39,7 @@ def generate_report(file_path: str, column_name: str) -> None:
     axis = license_type_counts.plot()
 
     report_path = f"{column_name}Plot.png"
-    print(f"Saving {column_name} report to {report_path}")
+    logging.info(f"Saving {column_name} report to {report_path}")
     axis.figure.savefig(report_path)
 
 
@@ -50,4 +51,7 @@ def run() -> None:
 
 
 if __name__ == "__main__":
+    logging.basicConfig()
+    logging.root.setLevel(logging.INFO)
+    
     run()
