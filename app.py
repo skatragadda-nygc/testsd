@@ -1,12 +1,9 @@
-from datetime import datetime
 import os
-from pprint import pprint
-from typing import DefaultDict
 import urllib.request
-import matplotlib.pyplot as plt
+from datetime import datetime
+
 import numpy as np
 import pandas as pd
-from datetime import datetime
 
 
 def download_data(file_path: str) -> None:
@@ -21,26 +18,35 @@ def download_data(file_path: str) -> None:
         print(f"Downloaded data file {file_path}")
 
 
-def run() -> None:
-    file_path = "dog_license_data.csv"
-    download_data(file_path)
+def generate_report(file_path: str, column_name: str) -> None:
+    print(f"Loading source data {file_path}")
+    df = pd.read_csv(file_path)
 
-    dog_data = pd.read_csv(file_path)
+    print("Transforming data")
     column_name_year = "Year"
-    column_name_license = "LicenseType"
-    dog_data[column_name_year] = dog_data.apply(
+    df[column_name_year] = df.apply(
         lambda row: str(datetime.fromisoformat(row.ValidDate).year),
         axis=1,
     )
-    license_type = dog_data[[column_name_license, column_name_year]]
+    license_type = df[[column_name, column_name_year]]
     license_type_counts = license_type.pivot_table(
         index=[column_name_year],
-        columns=[column_name_license],
+        columns=[column_name],
         aggfunc=np.count_nonzero,
         fill_value=0,
     )
     axis = license_type_counts.plot()
-    axis.figure.savefig("license_type_plot.png")
+
+    report_path = f"{column_name}Plot.png"
+    print(f"Saving {column_name} report to {report_path}")
+    axis.figure.savefig(report_path)
+
+
+def run() -> None:
+    file_path = "dog_license_data.csv"
+    download_data(file_path)
+
+    generate_report(file_path, "LicenseType")
 
 
 if __name__ == "__main__":
